@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ShieldShot — Beautiful screenshots that never leak your data</title>
+<meta name="description" content="Chrome extension that auto-blurs emails, phone numbers, IBANs and cards before capturing, then turns your screenshot into a beautiful shareable image. 100% local." />
+<style>
+  :root {
+    --ink: #111827; --muted: #6b7280; --line: #e5e7eb;
+    --grad: linear-gradient(135deg, #6366f1, #8b5cf6);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+  nav { display: flex; align-items: center; gap: 10px; padding: 20px 0; }
+  nav .logo { font-weight: 800; font-size: 18px; }
+  nav .spacer { flex: 1; }
+  .btn {
+    display: inline-block; text-decoration: none; font-weight: 600;
+    padding: 12px 22px; border-radius: 10px; color: #fff; background: var(--grad);
+  }
+  .btn.ghost { background: none; color: var(--ink); border: 1px solid var(--line); }
+  header.hero { text-align: center; padding: 64px 0 48px; }
+  .hero h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.15; letter-spacing: -1px; }
+  .hero h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.sub { color: var(--muted); font-size: 19px; max-width: 640px; margin: 18px auto 28px; }
+  .hero .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .hero .note { color: var(--muted); font-size: 13px; margin-top: 12px; }
+  .demo {
+    margin: 48px auto 0; max-width: 760px; border-radius: 16px; padding: 48px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+  }
+  .demo .win {
+    background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35); text-align: left;
+  }
+  .demo .bar { background: #ececec; padding: 10px 14px; display: flex; gap: 6px; }
+  .demo .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .demo .body { padding: 22px; font-size: 14.5px; }
+  .demo .body p { margin-bottom: 8px; }
+  .blur { filter: blur(5px); background: #eef; border-radius: 3px; }
+  section { padding: 56px 0; border-top: 1px solid #f3f4f6; }
+  section h2 { font-size: 28px; margin-bottom: 28px; text-align: center; letter-spacing: -0.5px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .card .ic { font-size: 26px; margin-bottom: 10px; }
+  .card h3 { font-size: 16.5px; margin-bottom: 6px; }
+  .card p { color: var(--muted); font-size: 14.5px; }
+  .pricing { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+  .plan { border: 1px solid var(--line); border-radius: 16px; padding: 28px; width: 300px; }
+  .plan.pro { border: 2px solid #6366f1; position: relative; }
+  .plan.pro .tag {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--grad); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 3px 12px; border-radius: 99px;
+  }
+  .plan .price { font-size: 34px; font-weight: 800; margin: 8px 0 2px; }
+  .plan .per { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .plan ul { list-style: none; margin-bottom: 20px; }
+  .plan li { padding: 5px 0; font-size: 14.5px; }
+  .plan li::before { content: "✓ "; color: #059669; font-weight: 700; }
+  .plan li.no::before { content: "— "; color: #d1d5db; }
+  .faq details { border-bottom: 1px solid #f3f4f6; padding: 14px 0; }
+  .faq summary { font-weight: 600; cursor: pointer; }
+  .faq p { color: var(--muted); margin-top: 8px; font-size: 15px; }
+  footer { padding: 40px 0; color: var(--muted); font-size: 13.5px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <span class="logo">⛨ ShieldShot</span>
+    <span class="spacer"></span>
+    <a class="btn ghost" href="#pricing">Pricing</a>
+    <a class="btn" id="navBuy" href="#pricing">Get Pro</a>
+  </nav>
+
+  <header class="hero">
+    <h1>Beautiful screenshots that <em>never leak your data</em></h1>
+    <p class="sub">
+      ShieldShot auto-blurs emails, phone numbers, IBANs and card numbers on the page
+      <strong>before</strong> capturing — then turns your screenshot into a polished,
+      share-ready image. All on your device. Nothing is uploaded, ever.
+    </p>
+    <div class="cta-row">
+      <a class="btn" id="installLink" href="#">Add to Chrome — Free</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+    <p class="note">Free forever with watermark · Pro is a one-time €19, no subscription</p>
+
+    <div class="demo">
+      <div class="win">
+        <div class="bar">
+          <span class="dot" style="background:#ff5f57"></span>
+          <span class="dot" style="background:#febc2e"></span>
+          <span class="dot" style="background:#28c840"></span>
+        </div>
+        <div class="body">
+          <p><strong>Customer record</strong></p>
+          <p>Name: Jane Cooper · Email: <span class="blur">jane.cooper@acme.com</span></p>
+          <p>Phone: <span class="blur">+34 612 345 678</span> · Plan: Business</p>
+          <p>IBAN: <span class="blur">ES91 2100 0418 4502 0005 1332</span></p>
+          <p style="color:#059669; font-size:13px; margin-top:12px">
+            ⛨ 3 sensitive items auto-blurred before capture
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="how">
+    <h2>Screenshot roulette is over</h2>
+    <div class="grid">
+      <div class="card"><div class="ic">🛡️</div><h3>Auto-redaction</h3>
+        <p>One click scans the page for emails, phones, IBANs, credit cards and ID numbers and blurs them in place — before the pixels are captured.</p></div>
+      <div class="card"><div class="ic">🎨</div><h3>Instantly beautiful</h3>
+        <p>Gradient backgrounds, padding, rounded corners, shadows and window frames. Presets sized for X, LinkedIn and stories.</p></div>
+      <div class="card"><div class="ic">🔒</div><h3>100% local</h3>
+        <p>No account. No server. No upload. Your screenshots never leave your machine — safe for client data, dashboards and internal tools.</p></div>
+      <div class="card"><div class="ic">▦</div><h3>Pixelate anything</h3>
+        <p>Drag over any region to pixelate it manually — names, avatars, revenue numbers, anything the auto-detector shouldn't decide for you.</p></div>
+      <div class="card"><div class="ic">⚡</div><h3>Fast by design</h3>
+        <p>Capture visible area, a selection, or a safe capture with a keyboard shortcut. Copy to clipboard or download in one click.</p></div>
+      <div class="card"><div class="ic">💶</div><h3>No subscription</h3>
+        <p>Pro is a one-time purchase with lifetime updates. Your screenshot tool shouldn't be a monthly bill.</p></div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <h2>Simple pricing</h2>
+    <div class="pricing">
+      <div class="plan">
+        <h3>Free</h3>
+        <div class="price">€0</div>
+        <div class="per">forever</div>
+        <ul>
+          <li>All capture modes</li>
+          <li>All backgrounds &amp; frames</li>
+          <li>10 safe captures included</li>
+          <li class="no">Small watermark on exports</li>
+        </ul>
+        <a class="btn ghost" id="freeLink" href="#" style="display:block;text-align:center">Add to Chrome</a>
+      </div>
+      <div class="plan pro">
+        <span class="tag">LIFETIME</span>
+        <h3>Pro</h3>
+        <div class="price">€19</div>
+        <div class="per">one-time · lifetime updates</div>
+        <ul>
+          <li>No watermark</li>
+          <li>Unlimited safe captures</li>
+          <li>Manual pixelate tool</li>
+          <li>Support an indie maker</li>
+        </ul>
+        <a class="btn" id="buyLink" href="#" style="display:block;text-align:center">Get Pro — €19</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq">
+    <h2>FAQ</h2>
+    <details><summary>Does ShieldShot send my screenshots anywhere?</summary>
+      <p>No. Detection, blurring, editing and export all happen inside your browser. The extension makes exactly one kind of network request: validating your license key with Gumroad when you activate Pro.</p></details>
+    <details><summary>What does it detect automatically?</summary>
+      <p>Email addresses, phone numbers, IBANs, credit card numbers and Spanish DNI/NIE identifiers. You can pixelate anything else manually in the editor.</p></details>
+    <details><summary>Is it really a one-time payment?</summary>
+      <p>Yes. €19 once, use it forever, including updates. No account required — just a license key.</p></details>
+    <details><summary>Does it work on Edge / Brave / Arc?</summary>
+      <p>Yes, any Chromium-based browser that supports Chrome extensions.</p></details>
+    <details><summary>Can I get a refund?</summary>
+      <p>If ShieldShot doesn't work for you, reply to your purchase email within 14 days and you'll get a full refund.</p></details>
+  </section>
+
+  <footer>
+    ⛨ ShieldShot · Made by an indie maker ·
+    <a href="mailto:fran.sangon.04@gmail.com" style="color:inherit">Contact</a>
+  </footer>
+</div>
+<script>
+  // Fill these two after publishing:
+  const CHROME_STORE_URL = "https://chromewebstore.google.com/detail/pgofldemcpmombhceombcoljgakfdmii";
+  const GUMROAD_URL = "https://franscape76.gumroad.com/l/shieldshot";
+  for (const id of ["installLink", "freeLink"]) document.getElementById(id).href = CHROME_STORE_URL;
+  for (const id of ["buyLink", "navBuy"]) document.getElementById(id).href = GUMROAD_URL;
+</script>
+</body>
+</html>
